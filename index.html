@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FBMP Configurations</title>
+
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+
+  <body>
+    <main class="popup">
+      <header class="header">
+        <div class="logo">F</div>
+        <div class="header-text">
+          <h1>FBMP Configurations</h1>
+          <p>Marketplace automation settings</p>
+        </div>
+      </header>
+
+      <section class="card">
+        <div class="info-row">
+          <span class="label">Client</span>
+          <span class="value">demo</span>
+        </div>
+
+        <div class="info-row">
+          <span class="label">Token</span>
+          <span class="value"></span>
+        </div>
+
+        <div class="tips">
+          <div class="tip">
+            <span class="tip-icon">i</span>
+            <span>Select Bulk Delete maximum twice in 15 days.</span>
+          </div>
+
+          <div class="tip">
+            <span class="tip-icon">i</span>
+            <span
+              >Mark Only Sold will mark inventories as SOLD when their status is
+              SOLD in your system.</span
+            >
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2 class="section-title">Select Action</h2>
+        <p class="section-subtitle">Choose one action to perform.</p>
+
+        <form class="actions" id="actionForm">
+          <label class="action-option">
+            <input type="radio" name="action" value="publish-update" checked />
+            <span class="action-title">Publish and Update</span>
+          </label>
+
+          <label class="action-option">
+            <input type="radio" name="action" value="bulk-delete" />
+            <span class="action-title">Only Bulk Delete</span>
+          </label>
+
+          <label class="action-option">
+            <input type="radio" name="action" value="renew" />
+            <span class="action-title">Only Renew</span>
+          </label>
+
+          <label class="action-option">
+            <input type="radio" name="action" value="mark-sold" />
+            <span class="action-title">Mark Only Sold</span>
+          </label>
+
+          <label class="action-option">
+            <input type="radio" name="action" value="test-login" />
+            <span class="action-title">Test Login</span>
+          </label>
+        </form>
+
+        <div class="button-row">
+          <button class="btn-secondary" type="button" id="setupBtn">
+            Setup
+          </button>
+          <button class="btn-primary" type="button" id="proceedBtn">
+            Proceed
+          </button>
+        </div>
+      </section>
+
+      <div class="footer">ZOP FBMP Web Extension</div>
+    </main>
+  </body>
+</html>
