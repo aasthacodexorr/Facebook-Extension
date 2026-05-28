@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Zop FBMP Poster",
+  "name": "Zop Poster",
   "author": "DCZ3R0",
   "version": "1.0.0",
   "description": "This plugin is designed to help you post your inventories on FB Marketplace with minimal efforts. It is powered by ZOP.",
@@ -11,7 +11,9 @@
   },
   "host_permissions": [
     "https://www.facebook.com/*",
-    "https://*.facebook.com/*"
+    "https://*.facebook.com/*",
+    "https://*.zopsoftware.com/*",
+    "https://*.zopsoftwareus.com/*"
   ],
   "side_panel": {
     "default_path": "index.html"
@@ -19,5 +21,5 @@
   "background": {
     "service_worker": "background.js"
   },
-  "permissions": ["sidePanel"]
+  "permissions": ["sidePanel", "storage"]
 }

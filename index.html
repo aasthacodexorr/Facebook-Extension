@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>FBMP Configurations</title>
 
-    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/styles.css" />
   </head>
 
   <body>
@@ -44,8 +44,41 @@
           </div>
         </div>
       </section>
-
       <section class="card">
+        <h2 class="section-title">Configuration</h2>
+        <p class="section-subtitle">
+          Enter your Client ID and Token to continue.
+        </p>
+
+        <form class="config-form" id="configForm">
+          <div class="form-group">
+            <label for="clientId">Client ID</label>
+            <input
+              type="text"
+              id="clientIdInput"
+              name="clientId"
+              placeholder="Enter Client ID"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="token">Token</label>
+            <input
+              type="password"
+              id="tokenInput"
+              name="token"
+              placeholder="Enter Token"
+            />
+          </div>
+
+          <button class="btn-primary" type="submit" id="saveConfigBtn">
+            Setup
+          </button>
+
+          <div class="config-status" id="configStatus"></div>
+        </form>
+      </section>
+      <section class="card actions d-none">
         <h2 class="section-title">Select Action</h2>
         <p class="section-subtitle">Choose one action to perform.</p>
 
@@ -77,8 +110,8 @@
         </form>
 
         <div class="button-row">
-          <button class="btn-secondary" type="button" id="setupBtn">
-            Setup
+          <button class="btn-secondary" type="button" id="resetConfigBtn">
+            Back to Setup
           </button>
           <button class="btn-primary" type="button" id="proceedBtn">
             Proceed
@@ -88,5 +121,6 @@
 
       <div class="footer">ZOP FBMP Web Extension</div>
     </main>
+    <script src="js/scripts.js"></script>
   </body>
 </html>
