@@ -31,6 +31,11 @@ async function saveConfig({ client_id, token }) {
   const data = await response.json();
 
   if (!response.ok) {
+    await chrome.storage.local.set({
+      token: "",
+      show_setup: true,
+    });
+
     return {
       success: false,
       message: data.errors || "Invalid Client ID or Token",
@@ -40,6 +45,7 @@ async function saveConfig({ client_id, token }) {
   await chrome.storage.local.set({
     client_id,
     token,
+    show_setup: false,
   });
 
   return {

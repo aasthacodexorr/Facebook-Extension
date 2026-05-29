@@ -18,15 +18,15 @@
         </div>
       </header>
 
-      <section class="card">
+      <section class="card d-none" id="connectionInformation">
         <div class="info-row">
           <span class="label">Client</span>
-          <span class="value">demo</span>
+          <span class="value" id="clientDom"></span>
         </div>
 
         <div class="info-row">
           <span class="label">Token</span>
-          <span class="value"></span>
+          <span class="value" id="tokenDom"></span>
         </div>
 
         <div class="tips">
@@ -44,7 +44,7 @@
           </div>
         </div>
       </section>
-      <section class="card">
+      <section class="card" id="configSection">
         <h2 class="section-title">Configuration</h2>
         <p class="section-subtitle">
           Enter your Client ID and Token to continue.
@@ -78,7 +78,7 @@
           <div class="config-status" id="configStatus"></div>
         </form>
       </section>
-      <section class="card actions d-none">
+      <section class="card actions d-none" id="actionSection">
         <h2 class="section-title">Select Action</h2>
         <p class="section-subtitle">Choose one action to perform.</p>
 
