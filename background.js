@@ -1,3 +1,5 @@
+import { fetchInventories } from "./js/zopsoftware.js";
+
 chrome.runtime.onInstalled.addListener(async () => {
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.type === "SAVE_CONFIG") {
@@ -25,17 +27,7 @@ async function saveConfig({ client_id, token }) {
   const formData = new FormData();
   formData.append("token", token);
 
-  const response = await fetch(
-    `https://${client_id}.zopsoftware.com/api/website/robot/feed/fbmp`,
-    {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-      },
-      body: formData,
-    },
-  );
-
+  const response = await fetchInventories(client_id, token);
   const data = await response.json();
 
   if (!response.ok) {
