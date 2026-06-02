@@ -1,4 +1,4 @@
-import { fetchInventories } from "./zopsoftware.js";
+import { fetchInventories } from "../zopsoftware.js";
 
 export const markInventoriesAsSold = async (client_id, token, cb) => {
   const formData = new FormData();
@@ -40,61 +40,17 @@ async function checkIfInvalidOrSold(post_id) {
 
       const [result] = await chrome.scripting.executeScript({
         target: { tabId: tab.id },
-        func: getInventoryStatusFromSoldInventoryFromPublishedPage,
+        files: [
+          "js/facebook/injection/helpers.js",
+          "js/facebook/injection/markAsSold.js",
+        ],
       });
 
       console.log(result.result);
+
+      await chrome.tabs.remove(tab.id);
     }
   }
-}
-
-function getInventoryStatusFromSoldInventoryFromPublishedPage() {
-  let posted_status = "";
-
-  function findSpansContainingText(text) {
-  return [...document.querySelectorAll("span")].filter((span) => {
-    return span.textContent.trim().includes(text);
-  });
-}
-
-function findSpansWithExactText(text) {
-  return [...document.querySelectorAll("span")].filter((span) => {
-    return span.textContent.trim().toLowerCase() === text.toLowerCase();
-  });
-}
-
-  const soldButtonDoms = findSpansContainingText("Mark as Sold");
-
-  console.log(soldButtonDoms);
-
-  if (soldButtonDoms.length !== 0) {
-    const lastSoldButton = soldButtonDoms[soldButtonDoms.length - 1];
-    clickElement(lastSoldButton);
-    return "SOLD";
-  }
-
-  const invalidTextExists = document.body.innerText.includes(
-    "It may have been sold or expired.",
-  );
-
-  if (invalidTextExists) {
-    return "SOLD";
-  }
-
-  const alreadySoldTextIndicator = findSpansWithExactText("Sold");
-
-  if (alreadySoldTextIndicator.length !== 0) {
-    return "SOLD";
-  }
-
-  const inventoryUnavailableTextIndicator =
-    findSpansWithExactText("Unavailable");
-
-  if (inventoryUnavailableTextIndicator.length !== 0) {
-    return "SOLD";
-  }
-
-  return "";
 }
 
 function waitForTabToLoad(tabId) {
