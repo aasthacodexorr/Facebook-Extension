@@ -74,8 +74,6 @@
           <button class="btn-primary" type="submit" id="saveConfigBtn">
             Setup
           </button>
-
-          <div class="config-status" id="configStatus"></div>
         </form>
       </section>
       <section class="card actions d-none" id="actionSection">
@@ -99,13 +97,8 @@
           </label>
 
           <label class="action-option">
-            <input type="radio" name="action" value="mark-sold" />
+            <input type="radio" name="action" value="MARK_ONLY_SOLD" />
             <span class="action-title">Mark Only Sold</span>
-          </label>
-
-          <label class="action-option">
-            <input type="radio" name="action" value="test-login" />
-            <span class="action-title">Test Login</span>
           </label>
         </form>
 
@@ -118,6 +111,7 @@
           </button>
         </div>
       </section>
+      <div class="config-status" id="configStatus"></div>
 
       <div class="footer">ZOP FBMP Web Extension</div>
     </main>

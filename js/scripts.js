@@ -1,6 +1,7 @@
 (function () {
   const setup_button = document.getElementById("saveConfigBtn");
   const reset_setup_button = document.getElementById("resetConfigBtn");
+  const proceed_button = document.getElementById("proceedBtn");
   const client_id_input = document.getElementById("clientIdInput");
   const token_input = document.getElementById("tokenInput");
   const config_status_dom = document.getElementById("configStatus");
@@ -97,6 +98,30 @@
     });
 
     loadConfig();
+  });
+
+  proceed_button.addEventListener("click", async function (event) {
+    event.preventDefault();
+    loadConfig();
+
+    const response = await chrome.runtime.sendMessage({
+      type: "MARK_ONLY_SOLD",
+      payload: {
+        client_id: client_id_input.value,
+        token: token_input.value,
+      },
+    });
+
+    if (!response.success) {
+      showMessage(
+        response.message ||
+          "We couldn’t verify your credentials, or you don’t currently have any inventory eligible for Facebook Marketplace.",
+        true,
+      );
+      return;
+    } else {
+      showMessage(response.message);
+    }
   });
 
   loadConfig();

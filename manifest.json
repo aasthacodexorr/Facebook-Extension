@@ -22,5 +22,5 @@
     "service_worker": "background.js",
     "type": "module"
   },
-  "permissions": ["sidePanel", "storage"]
+  "permissions": ["sidePanel", "storage", "scripting"]
 }
