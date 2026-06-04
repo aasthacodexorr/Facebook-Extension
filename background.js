@@ -1,5 +1,8 @@
 import { fetchInventories } from "./js/zopsoftware.js";
-import { markInventoriesAsSold } from "./js/facebook/actions.js";
+import {
+  markInventoriesAsSold,
+  publishAndUpdate,
+} from "./js/facebook/actions.js";
 
 chrome.runtime.onInstalled.addListener(async () => {
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -14,21 +17,21 @@ chrome.runtime.onInstalled.addListener(async () => {
             message: error.message || "Something went wrong",
           });
         });
-
-      return true;
     }
 
     if (message.type === "MARK_ONLY_SOLD") {
       console.log(`MARKING SOLD`);
       let { client_id, token } = message.payload;
       markInventoriesAsSold(client_id, token, sendResponse);
-      // sendResponse({
-      //   success: true,
-      //   message: `Marking SOLD`,
-      // });
-
-      return true;
     }
+
+    if (message.type === "PUBLISH_AND_UPDATE") {
+      console.log(`PUBLISH AND UPDATE`);
+      let { client_id, token } = message.payload;
+      publishAndUpdate(client_id, token, sendResponse);
+    }
+
+    return true;
   });
 
   chrome.sidePanel

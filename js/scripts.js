@@ -104,8 +104,12 @@
     event.preventDefault();
     loadConfig();
 
+    const action_value =
+      document.querySelector('input[name="action"]:checked')?.value || null;
+
+
     const response = await chrome.runtime.sendMessage({
-      type: "MARK_ONLY_SOLD",
+      type: action_value,
       payload: {
         client_id: client_id_input.value,
         token: token_input.value,
