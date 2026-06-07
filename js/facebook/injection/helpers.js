@@ -1,5 +1,6 @@
 const domHelpers = {
   sleep(ms) {
+    let random_ms = domHelpers.getRandomIntInclusive(ms, ms * 2);
     return new Promise((resolve) => setTimeout(resolve, ms));
   },
   findSpansContainingText(text) {
@@ -58,6 +59,11 @@ const domHelpers = {
 
     element.click();
   },
+  getRandomIntInclusive(min, max) {
+    const minCeiled = Math.ceil(min);
+    const maxFloored = Math.floor(max);
+    return Math.floor(Math.random() * (maxFloored - minCeiled + 1)) + minCeiled;
+  },
 };
 
 const vehicleMapper = {
@@ -94,10 +100,14 @@ const vehicleMapper = {
       vehicle_description,
     };
 
+    response["image_urls"] = vehicle.image_url
+      ? vehicle.image_url.split(";")
+      : [];
+
     response["transmission"] =
       transmission.toLowerCase() == "no"
         ? "Manual transmission"
-        : "Automatic Transmission";
+        : "Automatic transmission";
     return response;
   },
 };

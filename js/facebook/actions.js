@@ -52,6 +52,8 @@ export const publishAndUpdate = async (client_id, token, cb) => {
      * STEP 2: LOOP THROUGH ALL THE INVENTORIES x
      */
 
+    let published_inventories = 0;
+
     for (const vehicle of inventory) {
       /***
        * TODO : Algorithm :
@@ -68,10 +70,12 @@ export const publishAndUpdate = async (client_id, token, cb) => {
 
       if (!status) {
         let result = await publishInventory(vehicle);
-        break;
-      }
+        console.log(vehicle);
 
-      console.log(vehicle);
+        if (++published_inventories > 1) {
+          break;
+        }
+      }
     }
   } catch (error) {
     cb({ success: false, error: "There were some errors" });
@@ -99,6 +103,7 @@ async function publishInventory(vehicle) {
     });
 
     // await chrome.tabs.remove(tab.id);
+    console.log(result);
 
     return result.result;
   } catch (error) {
