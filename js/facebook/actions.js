@@ -55,6 +55,8 @@ export const publishAndUpdate = async (client_id, token, cb) => {
     let published_inventories = 0;
 
     for (const vehicle of inventory) {
+      let { post_id, stock_no, modification_hash } = vehicle;
+
       /***
        * TODO : Algorithm :
        * STEP 3: MAP EACH INVENTORY ATTRIBUTE x
@@ -63,15 +65,26 @@ export const publishAndUpdate = async (client_id, token, cb) => {
        * STEP 6: ELSE IF STATUS IS TO BE UPDATED CHECK IF PAGE CAN BE UPDATED, UPDATE THE LOG
        */
 
-      let { facebook_status: status } = vehicle;
-      if (["UPDATED", "PUBLISHED", "DRAFT"].includes(status)) {
+      let { facebook_status } = vehicle;
+      if (["UPDATED", "PUBLISHED", "DRAFT"].includes(facebook_status)) {
         continue;
       }
 
-      if (!status) {
+      if (!facebook_status) {
         let result = await publishInventory(vehicle);
         console.log(vehicle);
         console.log(result);
+
+        let { status, post_id: new_post_id } = result;
+
+        if (status) {
+          await updateLog(client_id, token, {
+            stock_no,
+            post_id: new_post_id,
+            current_modification_hash: modification_hash,
+            status: status,
+          });
+        }
 
         if (++published_inventories > 0) {
           break;
