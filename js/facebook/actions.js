@@ -71,8 +71,9 @@ export const publishAndUpdate = async (client_id, token, cb) => {
       if (!status) {
         let result = await publishInventory(vehicle);
         console.log(vehicle);
+        console.log(result);
 
-        if (++published_inventories > 1) {
+        if (++published_inventories > 0) {
           break;
         }
       }
@@ -90,9 +91,12 @@ async function publishInventory(vehicle) {
     });
 
     await waitForTabToLoad(tab.id);
+    await injectGraphqlInterceptor(tab.id);
     await sleep(5000);
 
     await setVehicleDataForTab(tab.id, vehicle);
+
+    const postIdPromise = waitForMarketplacePostId(tab.id, 300000);
 
     const [result] = await chrome.scripting.executeScript({
       target: { tabId: tab.id },
@@ -103,7 +107,12 @@ async function publishInventory(vehicle) {
     });
 
     // await chrome.tabs.remove(tab.id);
+    const post_id = await postIdPromise;
+
+    console.log("Marketplace post ID:", post_id);
     console.log(result);
+
+    result.result.post_id = post_id;
 
     return result.result;
   } catch (error) {
@@ -146,7 +155,7 @@ function waitForTabToLoad(tabId) {
     const timeout = setTimeout(() => {
       chrome.tabs.onUpdated.removeListener(listener);
       reject(new Error("Tab load timeout"));
-    }, 30000);
+    }, 300000);
 
     function listener(updatedTabId, changeInfo) {
       if (updatedTabId === tabId && changeInfo.status === "complete") {
@@ -180,6 +189,113 @@ async function setVehicleDataForTab(tabId, data) {
   });
 }
 
+async function waitForMarketplacePostId(tabId, timeout = 300000) {
+  const startedAt = Date.now();
+
+  while (Date.now() - startedAt < timeout) {
+    const [result] = await chrome.scripting.executeScript({
+      target: { tabId },
+      world: "MAIN",
+      func: () => window.__zopMarketplacePostId || "",
+    });
+
+    if (result.result) {
+      return result.result;
+    }
+
+    await sleep(500);
+  }
+
+  return "";
+}
+
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function injectGraphqlInterceptor(tabId) {
+  await chrome.scripting.executeScript({
+    target: { tabId },
+    world: "MAIN",
+    func: () => {
+      if (window.__zopGraphqlInterceptorInstalled) {
+        return;
+      }
+
+      window.__zopGraphqlInterceptorInstalled = true;
+      window.__zopMarketplacePostId = "";
+
+      const originalFetch = window.fetch;
+
+      window.fetch = async (...args) => {
+        const response = await originalFetch(...args);
+
+        try {
+          const url = typeof args[0] === "string" ? args[0] : args[0]?.url;
+
+          if (url && url.includes("/api/graphql")) {
+            const clonedResponse = response.clone();
+            const text = await clonedResponse.text();
+
+            const postId = extractMarketplacePostIdFromText(text);
+
+            if (postId) {
+              window.__zopMarketplacePostId = postId;
+            }
+          }
+        } catch (error) {
+          console.warn("GraphQL fetch intercept failed:", error);
+        }
+
+        return response;
+      };
+
+      const originalOpen = XMLHttpRequest.prototype.open;
+      const originalSend = XMLHttpRequest.prototype.send;
+
+      XMLHttpRequest.prototype.open = function (method, url, ...rest) {
+        this.__zopUrl = url;
+        return originalOpen.call(this, method, url, ...rest);
+      };
+
+      XMLHttpRequest.prototype.send = function (...args) {
+        this.addEventListener("load", function () {
+          try {
+            if (
+              this.__zopUrl &&
+              String(this.__zopUrl).includes("/api/graphql")
+            ) {
+              const postId = extractMarketplacePostIdFromText(
+                this.responseText,
+              );
+
+              if (postId) {
+                window.__zopMarketplacePostId = postId;
+              }
+            }
+          } catch (error) {
+            console.warn("GraphQL XHR intercept failed:", error);
+          }
+        });
+
+        return originalSend.apply(this, args);
+      };
+
+      function extractMarketplacePostIdFromText(text) {
+        try {
+          if (!text) return "";
+
+          const json = JSON.parse(text);
+
+          return (
+            json?.data?.marketplace_listing_create?.listing?.id ||
+            json?.data?.marketplace_listing_update?.listing?.id ||
+            ""
+          );
+        } catch {
+          return "";
+        }
+      }
+    },
+  });
 }
