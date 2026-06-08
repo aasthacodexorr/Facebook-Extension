@@ -18,7 +18,6 @@ export const fetchInventories = (client_id, token, options = {}) => {
   );
 };
 
-
 export const updateLog = (client_id, token, options = {}) => {
   const formData = new FormData();
   formData.append("token", token);
@@ -29,6 +28,22 @@ export const updateLog = (client_id, token, options = {}) => {
 
   return fetch(
     `https://${client_id}.zopsoftware.com/api/website/robot/feed/fbmp/update`,
+    {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+      },
+      body: formData,
+    },
+  );
+};
+
+export const deleteOneLog = (client_id, token, post_id) => {
+  const formData = new FormData();
+  formData.append("token", token);
+
+  return fetch(
+    `https://${client_id}.zopsoftware.com/api/website/robot/feed/fbmp/delete/${post_id}`,
     {
       method: "POST",
       headers: {

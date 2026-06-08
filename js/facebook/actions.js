@@ -1,4 +1,8 @@
-import { fetchInventories, updateLog } from "../zopsoftware.js";
+import {
+  fetchInventories,
+  updateLog,
+  deleteOneLog,
+} from "../zopsoftware.js";
 
 export const markInventoriesAsSold = async (client_id, token, cb) => {
   const formData = new FormData();
@@ -47,28 +51,23 @@ export const publishAndUpdate = async (client_id, token, cb) => {
     if (!response.ok) throw new Error("Network error occurred");
     const { inventory } = await response.json();
 
-    /**
-     * STEP 1: LOOP THROUGH ALL INVENTORIES WITH STATUS UPDATE AND IF THEY ARE UNAVAILABLE DELETE THE LOG
-     * STEP 2: LOOP THROUGH ALL THE INVENTORIES x
-     */
-
     let published_inventories = 0;
 
     for (const vehicle of inventory) {
       let { post_id, stock_no, modification_hash } = vehicle;
       let result = null;
 
-      /***
-       * TODO : Algorithm :
-       * STEP 3: MAP EACH INVENTORY ATTRIBUTE x
-       * STEP 4: IF STATUS IS UPDATED || PUBLISHED || DRAFT CONTINUE x
-       * STEP 5: IF EMPTY STATUS THEN DOWNLOAD IMAGES AND CREATE THE POST, UPDATE THE LOG, DELETE IMAGES
-       * STEP 6: ELSE IF STATUS IS TO BE UPDATED CHECK IF PAGE CAN BE UPDATED, UPDATE THE LOG
-       */
-
       let { facebook_status } = vehicle;
       if (["UPDATED", "PUBLISHED", "DRAFT"].includes(facebook_status)) {
         continue;
+      }
+
+      if (["TO BE UPDATED"].includes(facebook_status)) {
+        let current_status = await checkIfInvalidOrSold(post_id);
+        if (current_status === "TO BE DELETED") {
+          await deleteOneLog(client_id, token, post_id);
+          continue;
+        }
       }
 
       if (!facebook_status) {
@@ -94,6 +93,38 @@ export const publishAndUpdate = async (client_id, token, cb) => {
     cb({ success: false, error: "There were some errors" });
   }
 };
+
+async function checkIfInvalidOrSold(post_id) {
+  try {
+    if (post_id) {
+      if (post_id.trim() !== "") {
+        const tab = await chrome.tabs.create({
+          url: `https://www.facebook.com/marketplace/item/${post_id}`,
+          active: false,
+        });
+
+        await waitForTabToLoad(tab.id);
+        await sleep(5000);
+
+        const [result] = await chrome.scripting.executeScript({
+          target: { tabId: tab.id },
+          files: [
+            "js/facebook/injection/helpers.js",
+            "js/facebook/injection/is_invalid_or_sold.js",
+          ],
+        });
+
+        await chrome.tabs.remove(tab.id);
+
+        return result.result;
+      }
+    }
+
+    return "TO BE DELETED";
+  } catch (error) {
+    return "";
+  }
+}
 
 async function updateInventory(vehicle, post_id) {
   try {
