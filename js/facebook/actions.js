@@ -56,6 +56,7 @@ export const publishAndUpdate = async (client_id, token, cb) => {
 
     for (const vehicle of inventory) {
       let { post_id, stock_no, modification_hash } = vehicle;
+      let result = null;
 
       /***
        * TODO : Algorithm :
@@ -71,30 +72,59 @@ export const publishAndUpdate = async (client_id, token, cb) => {
       }
 
       if (!facebook_status) {
-        let result = await publishInventory(vehicle);
-        console.log(vehicle);
-        console.log(result);
-
-        let { status, post_id: new_post_id } = result;
-
-        if (status) {
-          await updateLog(client_id, token, {
-            stock_no,
-            post_id: new_post_id,
-            current_modification_hash: modification_hash,
-            status: status,
-          });
-        }
-
-        if (++published_inventories > 0) {
+        if (++published_inventories > 1) {
           break;
         }
+        
+        result = await publishInventory(vehicle);
+      } else if (post_id) {
+        result = await updateInventory(vehicle, post_id);
+      }
+
+      if (result?.status) {
+        await updateLog(client_id, token, {
+          stock_no,
+          post_id: result.post_id,
+          current_modification_hash: modification_hash,
+          status: result.status,
+        });
       }
     }
   } catch (error) {
     cb({ success: false, error: "There were some errors" });
   }
 };
+
+async function updateInventory(vehicle, post_id) {
+  try {
+    const tab = await chrome.tabs.create({
+      url: `https://www.facebook.com/marketplace/edit/?listing_id=${post_id}`,
+      active: true,
+    });
+
+    await waitForTabToLoad(tab.id);
+    await sleep(5000);
+
+    await setVehicleDataForTab(tab.id, vehicle);
+
+    const [result] = await chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      files: [
+        "js/facebook/injection/helpers.js",
+        "js/facebook/injection/update.js",
+      ],
+    });
+
+    console.log(result);
+
+    result.result.post_id = post_id;
+
+    await chrome.tabs.remove(tab.id);
+    return result.result;
+  } catch (error) {
+    return "";
+  }
+}
 
 async function publishInventory(vehicle) {
   try {
@@ -119,7 +149,6 @@ async function publishInventory(vehicle) {
       ],
     });
 
-    // await chrome.tabs.remove(tab.id);
     const post_id = await postIdPromise;
 
     console.log("Marketplace post ID:", post_id);
@@ -127,6 +156,7 @@ async function publishInventory(vehicle) {
 
     result.result.post_id = post_id;
 
+    await chrome.tabs.remove(tab.id);
     return result.result;
   } catch (error) {
     return "";
