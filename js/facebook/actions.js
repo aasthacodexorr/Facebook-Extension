@@ -19,7 +19,7 @@ export const markInventoriesAsSold = async (client_id, token, cb) => {
 
     for (const vehicle of inventory) {
       let { post_id, stock_no, modification_hash } = vehicle;
-      let result = await checkIfInvalidOrSold(post_id);
+      let result = await markAsSold(post_id);
 
       if (result === "SOLD" && post_id.trim() !== "") {
         await updateLog(client_id, token, {
@@ -75,7 +75,7 @@ export const publishAndUpdate = async (client_id, token, cb) => {
         if (++published_inventories > 1) {
           break;
         }
-        
+
         result = await publishInventory(vehicle);
       } else if (post_id) {
         result = await updateInventory(vehicle, post_id);
@@ -163,7 +163,7 @@ async function publishInventory(vehicle) {
   }
 }
 
-async function checkIfInvalidOrSold(post_id) {
+async function markAsSold(post_id) {
   try {
     if (post_id) {
       if (post_id.trim() !== "") {
@@ -179,7 +179,7 @@ async function checkIfInvalidOrSold(post_id) {
           target: { tabId: tab.id },
           files: [
             "js/facebook/injection/helpers.js",
-            "js/facebook/injection/markAsSold.js",
+            "js/facebook/injection/sold.js",
           ],
         });
 
