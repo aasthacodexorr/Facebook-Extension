@@ -82,6 +82,8 @@ const vehicleMapper = {
       fuel_type,
       vehicle_description,
       transmission,
+      enable_group_posting,
+      fbmp_list_of_groups,
     } = vehicle;
 
     const response = {
@@ -98,6 +100,8 @@ const vehicleMapper = {
       vehicle_condition: "Excellent",
       fuel_type,
       vehicle_description,
+      enable_group_posting,
+      fbmp_list_of_groups,
     };
 
     response["image_urls"] = vehicle.image_url

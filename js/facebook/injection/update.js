@@ -66,28 +66,26 @@
     await sleep(3000);
 
     if (next_button) {
-      if (next_button.getAttribute("aria-label") === "Update") {
+      if (next_button.getAttribute("aria-label") === "Next") {
         if (!next_button.getAttribute("aria-disabled")) {
           clickElement(next_button);
-          response.status = "UPDATED";
-          return response;
         }
-      } else {
-        clickElement(next_button);
-        await sleep(3000);
       }
     }
 
     await sleep(3000);
 
-    if (update_button) {
-      if (update_button.getAttribute("aria-disabled")) {
-        clickElement(draft_button);
-      } else {
-        response.status = "UPDATED";
-        clickElement(update_button);
+    if (next_button) {
+      if (next_button.getAttribute("aria-label") === "Update") {
+        if (next_button.getAttribute("aria-disabled")) {
+          clickElement(draft_button);
+        } else {
+          response.status = "UPDATED";
+          clickElement(next_button);
+        }
       }
     }
+    
     return response;
   }
 

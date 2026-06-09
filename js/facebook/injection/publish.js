@@ -100,26 +100,41 @@
     await sleep(3000);
 
     if (next_button) {
-      if (next_button.getAttribute("aria-label") === "Publish") {
+      if (next_button.getAttribute("aria-label") === "Next") {
         if (!next_button.getAttribute("aria-disabled")) {
           clickElement(next_button);
-          response.status = "PUBLISHED";
-          return response;
         }
-      } else {
-        clickElement(next_button);
-        await sleep(3000);
       }
     }
 
     await sleep(3000);
 
-    if (publish_button) {
-      if (publish_button.getAttribute("aria-disabled")) {
-        clickElement(draft_button);
-      } else {
-        response.status = "PUBLISHED";
-        clickElement(publish_button);
+    if (data.enable_group_posting === "1") {
+      let group_posting_section = findSpansWithExactText("List in your groups");
+
+      if (group_posting_section.length > 0) {
+        let fbmp_list_of_groups = data.fbmp_list_of_groups.slice(0, 20);
+        for (const fbmp_group_name of fbmp_list_of_groups) {
+          let current_dom = findDomsContainingText(
+            fbmp_group_name,
+            "div[role='checkbox']",
+          );
+
+          if (current_dom.length > 0) {
+            clickElement(current_dom[0]);
+          }
+        }
+      }
+    }
+
+    if (next_button) {
+      if (next_button.getAttribute("aria-label") === "Publish") {
+        if (next_button.getAttribute("aria-disabled")) {
+          clickElement(draft_button);
+        } else {
+          response.status = "PUBLISHED";
+          clickElement(next_button);
+        }
       }
     }
     return response;

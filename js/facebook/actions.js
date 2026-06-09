@@ -1,8 +1,4 @@
-import {
-  fetchInventories,
-  updateLog,
-  deleteOneLog,
-} from "../zopsoftware.js";
+import { fetchInventories, updateLog, deleteOneLog } from "../zopsoftware.js";
 
 export const markInventoriesAsSold = async (client_id, token, cb) => {
   const formData = new FormData();
@@ -49,12 +45,16 @@ export const publishAndUpdate = async (client_id, token, cb) => {
     const response = await fetchInventories(client_id, token);
 
     if (!response.ok) throw new Error("Network error occurred");
-    const { inventory } = await response.json();
+    const { inventory, enable_group_posting, fbmp_list_of_groups } =
+      await response.json();
 
     let published_inventories = 0;
 
     for (const vehicle of inventory) {
       let { post_id, stock_no, modification_hash } = vehicle;
+      vehicle.enable_group_posting = enable_group_posting;
+      vehicle.fbmp_list_of_groups = fbmp_list_of_groups;
+
       let result = null;
 
       let { facebook_status } = vehicle;
