@@ -1,4 +1,4 @@
-export const fetchInventories = (client_id, token, options = {}) => {
+export const fetchInventories = async (client_id, token, options = {}) => {
   const formData = new FormData();
   formData.append("token", token);
 
@@ -7,7 +7,7 @@ export const fetchInventories = (client_id, token, options = {}) => {
   }
 
   return fetch(
-    `https://${client_id}.zopsoftware.com/api/website/robot/feed/fbmp`,
+    `https://${client_id}.${await getDomain()}/api/website/robot/feed/fbmp`,
     {
       method: "POST",
       headers: {
@@ -18,7 +18,7 @@ export const fetchInventories = (client_id, token, options = {}) => {
   );
 };
 
-export const updateLog = (client_id, token, options = {}) => {
+export const updateLog = async (client_id, token, options = {}) => {
   const formData = new FormData();
   formData.append("token", token);
 
@@ -27,7 +27,7 @@ export const updateLog = (client_id, token, options = {}) => {
   }
 
   return fetch(
-    `https://${client_id}.zopsoftware.com/api/website/robot/feed/fbmp/update`,
+    `https://${client_id}.${await getDomain()}/api/website/robot/feed/fbmp/update`,
     {
       method: "POST",
       headers: {
@@ -38,12 +38,12 @@ export const updateLog = (client_id, token, options = {}) => {
   );
 };
 
-export const deleteOneLog = (client_id, token, post_id) => {
+export const deleteOneLog = async (client_id, token, post_id) => {
   const formData = new FormData();
   formData.append("token", token);
 
   return fetch(
-    `https://${client_id}.zopsoftware.com/api/website/robot/feed/fbmp/delete/${post_id}`,
+    `https://${client_id}.${await getDomain()}/api/website/robot/feed/fbmp/delete/${post_id}`,
     {
       method: "POST",
       headers: {
@@ -53,3 +53,14 @@ export const deleteOneLog = (client_id, token, post_id) => {
     },
   );
 };
+
+async function getDomain() {
+  const data = await chrome.storage.local.get(["country"]);
+  if (data.country) {
+    return data.country.toLowerCase() === "US".toLowerCase()
+      ? "zopsoftwareus.com"
+      : "zopsoftware.com";
+  }
+
+  return "zopsoftware.com";
+}

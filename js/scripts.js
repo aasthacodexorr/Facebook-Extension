@@ -4,6 +4,7 @@
   const proceed_button = document.getElementById("proceedBtn");
   const client_id_input = document.getElementById("clientIdInput");
   const token_input = document.getElementById("tokenInput");
+  const country_select = document.getElementById("countrySelect");
   const config_status_dom = document.getElementById("configStatus");
   const connection_information_dom = document.getElementById(
     "connectionInformation",
@@ -29,6 +30,7 @@
       "client_id",
       "token",
       "show_setup",
+      "country",
     ]);
 
     if (data.client_id) {
@@ -40,6 +42,10 @@
       token_input.value = data.token;
       token_dom.innerText =
         "*".repeat(data.token.length - 4) + data.token.slice(-4);
+    }
+
+    if (data.country) {
+      country_select.value = data.country;
     }
 
     if (data.show_setup) {
@@ -58,6 +64,7 @@
 
     const client_id_value = client_id_input.value.trim();
     const token_input_value = token_input.value.trim();
+    const country_select_value = country_select.value.trim();
 
     showMessage();
 
@@ -74,6 +81,7 @@
       payload: {
         client_id: client_id_value,
         token: token_input_value,
+        country: country_select_value,
       },
     });
 
@@ -106,7 +114,6 @@
 
     const action_value =
       document.querySelector('input[name="action"]:checked')?.value || null;
-
 
     const response = await chrome.runtime.sendMessage({
       type: action_value,

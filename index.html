@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>FBMP Configurations</title>
+    <title>Marketplace Assistant</title>
 
     <link rel="stylesheet" href="css/styles.css" />
   </head>
@@ -13,7 +13,7 @@
       <header class="header">
         <div class="logo">F</div>
         <div class="header-text">
-          <h1>FBMP Configurations</h1>
+          <h1>Marketplace Assistant</h1>
           <p>Marketplace automation settings</p>
         </div>
       </header>
@@ -70,6 +70,13 @@
               placeholder="Enter Token"
             />
           </div>
+          <div class="form-group">
+            <label for="countrySelect">Country</label>
+            <select name="country" id="countrySelect">
+              <option value="CA" selected>CANADA</option>
+              <option value="US">USA</option>
+            </select>
+          </div>
 
           <button class="btn-primary" type="submit" id="saveConfigBtn">
             Setup
@@ -82,11 +89,16 @@
 
         <form class="actions" id="actionForm">
           <label class="action-option">
-            <input type="radio" name="action" value="PUBLISH_AND_UPDATE" checked />
+            <input
+              type="radio"
+              name="action"
+              value="PUBLISH_AND_UPDATE"
+              checked
+            />
             <span class="action-title">Publish and Update</span>
           </label>
 
-          <label class="action-option">
+          <!-- <label class="action-option">
             <input type="radio" name="action" value="bulk-delete" />
             <span class="action-title">Only Bulk Delete</span>
           </label>
@@ -94,7 +106,7 @@
           <label class="action-option">
             <input type="radio" name="action" value="renew" />
             <span class="action-title">Only Renew</span>
-          </label>
+          </label> -->
 
           <label class="action-option">
             <input type="radio" name="action" value="MARK_ONLY_SOLD" />

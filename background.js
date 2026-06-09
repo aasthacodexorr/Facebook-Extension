@@ -39,9 +39,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   return true;
 });
 
-async function saveConfig({ client_id, token }) {
+async function saveConfig({ client_id, token, country }) {
   const formData = new FormData();
   formData.append("token", token);
+
+  await chrome.storage.local.set({ country });
 
   const response = await fetchInventories(client_id, token);
   const data = await response.json();
