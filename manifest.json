@@ -1,9 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "Zop Poster",
+  "name": "Marketplace Assistant",
   "author": "DCZ3R0",
   "version": "1.0.0",
-  "description": "This plugin is designed to help you post your inventories on FB Marketplace with minimal efforts. It is powered by ZOP.",
+  "description": "This plugin is designed to help you post your inventories on FB Marketplace with minimal efforts. Saving you time and money. Powered by ZOP.",
   "icons": {
     "32": "images/chrome_icon_tight_32.png",
     "48": "images/chrome_icon_tight_48.png",
