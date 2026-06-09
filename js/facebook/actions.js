@@ -62,7 +62,7 @@ export const publishAndUpdate = async (client_id, token, cb) => {
         continue;
       }
 
-      if (["TO BE UPDATED"].includes(facebook_status)) {
+      if (["TO BE UPDATED", "SOLD"].includes(facebook_status)) {
         let current_status = await checkIfInvalidOrSold(post_id);
         if (current_status === "TO BE DELETED") {
           await deleteOneLog(client_id, token, post_id);
