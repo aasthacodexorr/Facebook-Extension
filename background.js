@@ -1,4 +1,5 @@
 import { fetchInventories } from "./js/zopsoftware.js";
+import { handleBackgroundImageFetchRequest } from "./js/background_fetch.js";
 import {
   markInventoriesAsSold,
   publishAndUpdate,
@@ -71,3 +72,5 @@ async function saveConfig({ client_id, token, country }) {
     message: "Configuration saved successfully",
   };
 }
+
+chrome.storage.onChanged.addListener(handleBackgroundImageFetchRequest);

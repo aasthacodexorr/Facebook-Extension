@@ -3,11 +3,11 @@
     findSpansContainingText,
     findSpansWithExactText,
     clickElement,
-    sleep,
     fillInput,
     elementExists,
     findDomsContainingText,
   } = window.domHelpers;
+
   async function publishInventory() {
     const { mapper } = window.vehicleMapper;
     const data = mapper(window.vehicle_data);
@@ -196,69 +196,17 @@
     await sleep(3000);
   }
 
-  async function fetchImageAsFile(imageUrl, fileName = "image.jpg") {
-    const response = await fetch(imageUrl, {
-      headers: {
-        Accept: "image/webp,image/avif,image/*,*/*;q=0.8",
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`Image fetch failed: ${response.status}`);
-    }
-
-    const blob = await response.blob();
-
-    return new File([blob], fileName, {
-      type: blob.type || "image/jpeg",
-      lastModified: Date.now(),
-    });
-  }
-
-  function findFacebookFileInput() {
-    const dialogInput = document
-      .querySelector('[role="dialog"] form')
-      ?.querySelector('input[type="file"]');
-
-    if (dialogInput) {
-      return dialogInput;
-    }
-
-    const inputs = document.querySelectorAll('input[type="file"]');
-
-    return inputs.length > 0 ? inputs[0] : null;
-  }
-
-  function uploadFileToFacebookInput(file) {
-    const fileInput = findFacebookFileInput();
-
-    if (!fileInput) {
-      throw new Error("Facebook file input not found");
-    }
-
-    const dataTransfer = new DataTransfer();
-
-    dataTransfer.items.add(file);
-
-    fileInput.value = "";
-    fileInput.files = dataTransfer.files;
-
-    fileInput.dispatchEvent(new Event("input", { bubbles: true }));
-    fileInput.dispatchEvent(new Event("change", { bubbles: true }));
-  }
-
   async function uploadMultipleImagesToFacebookMarketplace(imageUrls) {
     for (let index = 0; index < imageUrls.length; index++) {
       const imageUrl = imageUrls[index];
 
-      const file = await fetchImageAsFile(
-        imageUrl,
-        `marketplace-image-${index + 1}.jpg`,
-      );
+      try {
+        ImageUploadSingleton.upload(imageUrl, index + 1);
 
-      uploadFileToFacebookInput(file);
-
-      await sleep(1000);
+        await sleep(1000);
+      } catch (error) {
+        console.error(`Error: ${e}`);
+      }
     }
   }
 

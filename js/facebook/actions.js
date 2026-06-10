@@ -176,6 +176,7 @@ async function publishInventory(vehicle) {
       target: { tabId: tab.id },
       files: [
         "js/facebook/injection/helpers.js",
+        "js/facebook/injection/image_upload.js",
         "js/facebook/injection/publish.js",
       ],
     });

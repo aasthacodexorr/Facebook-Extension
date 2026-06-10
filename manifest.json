@@ -13,7 +13,8 @@
     "https://www.facebook.com/*",
     "https://*.facebook.com/*",
     "https://*.zopsoftware.com/*",
-    "https://*.zopsoftwareus.com/*"
+    "https://*.zopsoftwareus.com/*",
+    "https://zopsoftware-asset.b-cdn.net/*"
   ],
   "side_panel": {
     "default_path": "index.html"
