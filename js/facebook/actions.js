@@ -71,7 +71,7 @@ export const publishAndUpdate = async (client_id, token, cb) => {
       }
 
       if (!facebook_status) {
-        if (++published_inventories > 1) {
+        if (++published_inventories > 20) {
           break;
         }
 
@@ -130,7 +130,7 @@ async function updateInventory(vehicle, post_id) {
   try {
     const tab = await chrome.tabs.create({
       url: `https://www.facebook.com/marketplace/edit/?listing_id=${post_id}`,
-      active: true,
+      active: false,
     });
 
     await waitForTabToLoad(tab.id);
@@ -161,7 +161,7 @@ async function publishInventory(vehicle) {
   try {
     const tab = await chrome.tabs.create({
       url: `https://www.facebook.com/marketplace/create/vehicle`,
-      active: true,
+      active: false,
     });
 
     await waitForTabToLoad(tab.id);
