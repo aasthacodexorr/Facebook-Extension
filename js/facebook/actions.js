@@ -35,6 +35,34 @@ export const markInventoriesAsSold = async (client_id, token, cb) => {
   }
 };
 
+export const onlyBulkDelete = async (client_id, token, cb) => {
+  try {
+    cb({
+      success: true,
+      message: `We are currently bulk deleting the inventories ...`,
+    });
+
+    const response = await fetchInventories(client_id, token, {
+      onlyPublished: true,
+    });
+
+    if (!response.ok) throw new Error("Network error occurred");
+    const { inventory } = await response.json();
+
+    let search_index = inventory.map(({ year, make }) => `${year} ${make}`);
+    let post_ids = inventory.map(({ post_id }) => post_id + "");
+    search_index = [...new Set(search_index)];
+
+    console.log(search_index);
+
+    for (const search_term of search_index) {
+      await deleteBySearchIndex(search_term, post_ids);
+    }
+  } catch (error) {
+    cb({ success: false, error: "There were some errors bulk deleting ..." });
+  }
+};
+
 export const publishAndUpdate = async (client_id, token, cb) => {
   try {
     cb({
@@ -71,7 +99,7 @@ export const publishAndUpdate = async (client_id, token, cb) => {
       }
 
       if (!facebook_status) {
-        if (++published_inventories > 20) {
+        if (++published_inventories > 5) {
           break;
         }
 
@@ -126,11 +154,43 @@ async function checkIfInvalidOrSold(post_id) {
   }
 }
 
+async function deleteBySearchIndex(search, post_ids) {
+  try {
+    if (search) {
+      if (search.trim() !== "") {
+        const tab = await chrome.tabs.create({
+          url: `https://www.facebook.com/marketplace/you/selling`,
+          active: true,
+        });
+
+        await waitForTabToLoad(tab.id);
+        await sleep(5000);
+
+        await setSearchIndexForTab(tab.id, search, post_ids);
+
+        const [result] = await chrome.scripting.executeScript({
+          target: { tabId: tab.id },
+          files: [
+            "js/facebook/injection/helpers.js",
+            "js/facebook/injection/bulk_delete.js",
+          ],
+        });
+
+        //await chrome.tabs.remove(tab.id);
+
+        return result.result;
+      }
+    }
+  } catch (error) {
+    return "";
+  }
+}
+
 async function updateInventory(vehicle, post_id) {
   try {
     const tab = await chrome.tabs.create({
       url: `https://www.facebook.com/marketplace/edit/?listing_id=${post_id}`,
-      active: false,
+      active: true,
     });
 
     await waitForTabToLoad(tab.id);
@@ -161,7 +221,7 @@ async function publishInventory(vehicle) {
   try {
     const tab = await chrome.tabs.create({
       url: `https://www.facebook.com/marketplace/create/vehicle`,
-      active: false,
+      active: true,
     });
 
     await waitForTabToLoad(tab.id);
@@ -252,6 +312,17 @@ function clickElement(element) {
   });
 
   element.click();
+}
+
+async function setSearchIndexForTab(tabId, search, post_ids) {
+  await chrome.scripting.executeScript({
+    target: { tabId },
+    func: (search_index, post_ids) => {
+      window.search_index = search_index;
+      window.post_ids = post_ids;
+    },
+    args: [search, post_ids],
+  });
 }
 
 async function setVehicleDataForTab(tabId, data) {
