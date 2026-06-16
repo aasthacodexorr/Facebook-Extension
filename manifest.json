@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Marketplace Assistant",
   "author": "DCZ3R0",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "This plugin is designed to help you post your inventories on FB Marketplace with minimal efforts. Saving you time and money. Powered by ZOP.",
   "icons": {
     "32": "images/chrome_icon_tight_32.png",
