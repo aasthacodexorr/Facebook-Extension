@@ -197,13 +197,13 @@
   }
 
   async function uploadMultipleImagesToFacebookMarketplace(imageUrls) {
-    for (let index = 0; index < imageUrls.length; index++) {
+    for (let index = 0; index < imageUrls.length && index < 20 ; index++) {
       const imageUrl = imageUrls[index];
 
       try {
         ImageUploadSingleton.upload(imageUrl, index + 1);
 
-        await sleep(1000);
+        await sleep(5000);
       } catch (error) {
         console.error(`Error: ${e}`);
       }

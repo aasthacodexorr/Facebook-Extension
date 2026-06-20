@@ -48,7 +48,9 @@ class FetchImageUpload extends ImageUpload {
       throw new Error(`Image fetch failed: ${response.status}`);
     }
 
-    const blob = await response.blob();
+    const original_blob = await response.blob();
+
+    const blob = await this.convertImageBlobToJpeg(original_blob);
 
     return new File([blob], fileName, {
       type: blob.type || "image/jpeg",
@@ -62,7 +64,45 @@ class FetchImageUpload extends ImageUpload {
       imageUrl,
       `marketplace-image-${index + 1}.jpg`,
     );
+
+    console.log("Adding Facebook file:", {
+      url: imageUrl,
+      name: file.name,
+      type: file.type,
+      sizeBytes: file.size,
+      sizeMB: (file.size / 1024 / 1024).toFixed(2),
+    });
+
     this.uploadFileToFacebookInput(file);
+  }
+
+  async convertImageBlobToJpeg(blob) {
+    const imageBitmap = await createImageBitmap(blob);
+
+    const canvas = document.createElement("canvas");
+    canvas.width = imageBitmap.width;
+    canvas.height = imageBitmap.height;
+
+    const ctx = canvas.getContext("2d");
+
+    ctx.drawImage(imageBitmap, 0, 0);
+
+    imageBitmap.close?.();
+
+    return await new Promise((resolve, reject) => {
+      canvas.toBlob(
+        (jpegBlob) => {
+          if (!jpegBlob) {
+            reject(new Error("Canvas JPEG conversion failed"));
+            return;
+          }
+
+          resolve(jpegBlob);
+        },
+        "image/jpeg",
+        0.92,
+      );
+    });
   }
 }
 
@@ -168,8 +208,8 @@ class ImageUploadSingleton {
         await ImageUploadSingleton.instance.upload(imageUrl, index);
         console.log("background fallback option initial...");
       }
+    } else {
+      await ImageUploadSingleton.instance.upload(imageUrl, index);
     }
-
-    return await ImageUploadSingleton.instance.upload(imageUrl, index);
   }
 }

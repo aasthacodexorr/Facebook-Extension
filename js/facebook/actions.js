@@ -227,14 +227,10 @@ async function publishInventory(vehicle) {
   try {
     const tab = await chrome.tabs.create({
       url: `https://www.facebook.com/marketplace/create/vehicle`,
-      active: false,
+      active: true,
     });
 
     await sleep(500);
-
-    await chrome.tabs.update(tab.id, {
-      active: true,
-    });
 
     await waitForTabToLoad(tab.id);
     await injectGraphqlInterceptor(tab.id);
@@ -273,14 +269,10 @@ async function markAsSold(post_id) {
       if (post_id.trim() !== "") {
         const tab = await chrome.tabs.create({
           url: `https://www.facebook.com/marketplace/item/${post_id}`,
-          active: false,
+          active: true,
         });
 
         await sleep(500);
-
-        await chrome.tabs.update(tab.id, {
-          active: true,
-        });
 
         await waitForTabToLoad(tab.id);
         await sleep(5000);
