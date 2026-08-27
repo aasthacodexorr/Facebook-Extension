@@ -15,7 +15,7 @@
       status: "DRAFT",
     };
 
-    await sleep(3000);
+    await sleep(6000);
     const vehicle_type_doms = findSpansWithExactText("Vehicle type");
     // Vehicle type
 
@@ -24,16 +24,16 @@
     }
 
     clickElement(findSpansWithExactText("Vehicle type")[0]);
-    await sleep(3000);
+    await sleep(6000);
 
     clickElement(findSpansWithExactText(data.vehicle_type)[0]);
 
     if (data.location.trim().length > 0) {
       await fillInput('input[aria-label="Location"]', data.location);
-      await sleep(3000);
+      await sleep(6000);
       clickElement(findSpansWithExactText(data.location)[0]);
     }
-    await sleep(3000);
+    await sleep(6000);
 
     if (data.image_urls.length > 0) {
       console.log(data.image_urls);
@@ -41,7 +41,7 @@
     }
 
     clickElement(findSpansWithExactText("Year")[0]);
-    await sleep(3000);
+    await sleep(6000);
 
     clickElement(findSpansWithExactText(data.year)[0]);
 
@@ -87,17 +87,17 @@
     }
 
     clickElement(next_button);
-    await sleep(3000);
+    await sleep(6000);
 
     if (elementExists(`input[aria-label="Location"]`)) {
       if (data.location.trim().length > 0) {
         await fillInput('input[aria-label="Location"]', data.location);
-        await sleep(3000);
+        await sleep(6000);
         clickElement(findSpansWithExactText(data.location)[0]);
       }
     }
 
-    await sleep(3000);
+    await sleep(6000);
 
     if (next_button) {
       if (next_button.getAttribute("aria-label") === "Next") {
@@ -107,7 +107,7 @@
       }
     }
 
-    await sleep(3000);
+    await sleep(6000);
 
     if (data.enable_group_posting === "1") {
       let group_posting_section = findSpansWithExactText("List in your groups");
@@ -154,7 +154,7 @@
     }
 
     clickElement(labels[0]);
-    await sleep(3000);
+    await sleep(6000);
 
     let options_menus = document.querySelectorAll(
       `div[aria-label="Select an option"]`,
@@ -173,7 +173,7 @@
       clickElement(correct_option[0]);
     }
 
-    await sleep(3000);
+    await sleep(6000);
   }
 
   async function fillInputByLabel(
@@ -193,17 +193,17 @@
       await fillInput(selector, value, labels[0]);
     }
 
-    await sleep(3000);
+    await sleep(6000);
   }
 
   async function uploadMultipleImagesToFacebookMarketplace(imageUrls) {
-    for (let index = 0; index < imageUrls.length && index < 20 ; index++) {
+    for (let index = 0; index < imageUrls.length && index < 20; index++) {
       const imageUrl = imageUrls[index];
 
       try {
         ImageUploadSingleton.upload(imageUrl, index + 1);
 
-        await sleep(5000);
+        await sleep(7000);
       } catch (error) {
         console.error(`Error: ${e}`);
       }

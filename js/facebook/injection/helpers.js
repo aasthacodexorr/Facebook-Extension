@@ -1,7 +1,7 @@
 const domHelpers = {
   sleep(ms) {
-    let random_ms = domHelpers.getRandomIntInclusive(ms, ms * 2);
-    return new Promise((resolve) => setTimeout(resolve, ms));
+    let random_ms = domHelpers.getRandomIntInclusive(ms, ms * 1.2);
+    return new Promise((resolve) => setTimeout(resolve, random_ms));
   },
   findSpansContainingText(text) {
     return [...document.querySelectorAll("span")].filter((span) => {

@@ -15,7 +15,7 @@
       status: "NOT UPDATED",
     };
 
-    await sleep(3000);
+    await sleep(6000);
     const vehicle_type_doms = findSpansWithExactText("Vehicle type");
     // Vehicle type
 
@@ -63,7 +63,7 @@
 
     clickElement(next_button);
 
-    await sleep(3000);
+    await sleep(6000);
 
     if (next_button) {
       if (next_button.getAttribute("aria-label") === "Next") {
@@ -73,7 +73,7 @@
       }
     }
 
-    await sleep(3000);
+    await sleep(6000);
 
     if (next_button) {
       if (next_button.getAttribute("aria-label") === "Update") {
@@ -85,7 +85,7 @@
         }
       }
     }
-    
+
     return response;
   }
 
@@ -103,7 +103,7 @@
     }
 
     clickElement(labels[0]);
-    await sleep(3000);
+    await sleep(6000);
 
     let options_menus = document.querySelectorAll(
       `div[aria-label="Select an option"]`,
@@ -122,7 +122,7 @@
       clickElement(correct_option[0]);
     }
 
-    await sleep(3000);
+    await sleep(6000);
   }
 
   async function fillInputByLabel(
@@ -142,7 +142,7 @@
       await fillInput(selector, value, labels[0]);
     }
 
-    await sleep(3000);
+    await sleep(6000);
   }
 
   return updateInventory();

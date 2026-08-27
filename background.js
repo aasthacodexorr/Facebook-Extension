@@ -12,6 +12,14 @@ chrome.runtime.onInstalled.addListener(async () => {
     .catch((error) => console.error(error));
 });
 
+chrome.runtime.onInstalled.addListener(async (details) => {
+  if (details.reason === "install") {
+    await chrome.storage.local.set({
+      show_setup: true,
+    });
+  }
+});
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === "SAVE_CONFIG") {
     saveConfig(message.payload)

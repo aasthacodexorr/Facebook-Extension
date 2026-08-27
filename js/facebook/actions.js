@@ -238,7 +238,7 @@ async function publishInventory(vehicle) {
 
     await setVehicleDataForTab(tab.id, vehicle);
 
-    const postIdPromise = waitForMarketplacePostId(tab.id, 300000);
+    const postIdPromise = waitForMarketplacePostId(tab.id, 420000);
 
     const [result] = await chrome.scripting.executeScript({
       target: { tabId: tab.id },
@@ -346,20 +346,24 @@ async function setVehicleDataForTab(tabId, data) {
 }
 
 async function waitForMarketplacePostId(tabId, timeout = 300000) {
-  const startedAt = Date.now();
+  try {
+    const startedAt = Date.now();
 
-  while (Date.now() - startedAt < timeout) {
-    const [result] = await chrome.scripting.executeScript({
-      target: { tabId },
-      world: "MAIN",
-      func: () => window.__zopMarketplacePostId || "",
-    });
+    while (Date.now() - startedAt < timeout) {
+      const [result] = await chrome.scripting.executeScript({
+        target: { tabId },
+        world: "MAIN",
+        func: () => window.__zopMarketplacePostId || "",
+      });
 
-    if (result.result) {
-      return result.result;
+      if (result?.result) {
+        return result.result;
+      }
+
+      await sleep(500);
     }
-
-    await sleep(500);
+  } catch (error) {
+    console.log(error);
   }
 
   return "";
