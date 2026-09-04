@@ -76,12 +76,13 @@
       }
 
       clickElement(listing);
-      await sleep(5000);
+      await sleep(10000);
 
       const view_modal = findDomsContainingText(
         "Your Listing",
         "div[aria-label='Your Listing'][role='dialog']",
       );
+
       if (view_modal.length > 0) {
         let post_id = null;
         const edit_listing_dom = view_modal[0].querySelector(
@@ -94,6 +95,8 @@
             post_id = url.match(/listing_id=(\d+)/)[1];
           }
         }
+
+        console.log(post_id);
 
         const view_listing_dom = view_modal[0].querySelector(
           "a[aria-label='View Listing'][role='link']",
@@ -109,7 +112,7 @@
         if (post_id && post_id !== "") {
           if (post_ids.includes(post_id)) {
             const delete_button = view_modal[0].querySelector(
-              "div[aria-label='Delete marketplace listing'][role='button']",
+              "div[aria-label='Delete Marketplace listing'][role='button']",
             );
 
             clickElement(delete_button);
@@ -134,12 +137,17 @@
 
                 clickElement(delete_action_button);
                 await sleep(5000);
-                await chrome.runtime.sendMessage({
-                  type: "DELETE_ONE_LOG",
-                  payload: {
-                    post_id,
-                  },
-                });
+
+                try {
+                  await chrome.runtime.sendMessage({
+                    type: "DELETE_ONE_LOG",
+                    payload: {
+                      post_id,
+                    },
+                  });
+                } catch (error) {
+                  console.warn("DELETE_ONE_LOG message failed:", error);
+                }
               }
 
               await sleep(5000);

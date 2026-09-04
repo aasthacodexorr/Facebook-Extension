@@ -6,6 +6,11 @@ import {
   onlyBulkDelete,
 } from "./js/facebook/actions.js";
 
+import {
+  runAbortableProcess,
+  stopProcess,
+} from "./js/automation/process_manager.js";
+
 chrome.runtime.onInstalled.addListener(async () => {
   chrome.sidePanel
     .setPanelBehavior({ openPanelOnActionClick: true })
@@ -21,6 +26,24 @@ chrome.runtime.onInstalled.addListener(async (details) => {
 });
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.type === "STOP_PROCESS") {
+    stopProcess()
+      .then(() => {
+        sendResponse({
+          success: true,
+          message: "Process stopped",
+        });
+      })
+      .catch((error) => {
+        sendResponse({
+          success: false,
+          message: error.message || "Could not stop process",
+        });
+      });
+
+    return true;
+  }
+
   if (message.type === "SAVE_CONFIG") {
     saveConfig(message.payload)
       .then((result) => {
@@ -32,40 +55,75 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           message: error.message || "Something went wrong",
         });
       });
+
+    return true;
+  }
+
+  if (message.type === "PROCESS_UPDATE") {
+    console.log("Process update:", message.payload);
+
+    sendResponse({
+      success: false,
+      message: message.payload,
+    });
+
+    return true;
   }
 
   if (message.type === "MARK_ONLY_SOLD") {
-    console.log(`MARKING SOLD`);
-    let { client_id, token } = message.payload;
-    markInventoriesAsSold(client_id, token, sendResponse);
+    return runAbortableProcess(async (process) => {
+      console.log(`MARKING SOLD`);
+      let { client_id, token } = message.payload;
+      return await markInventoriesAsSold(client_id, token, process);
+    }, sendResponse);
   }
 
   if (message.type === "PUBLISH_AND_UPDATE") {
-    console.log(`PUBLISH AND UPDATE`);
-    let { client_id, token } = message.payload;
-    publishAndUpdate(client_id, token, sendResponse);
+    return runAbortableProcess(async (process) => {
+      console.log(`PUBLISH AND UPDATE`);
+      let { client_id, token } = message.payload;
+      return await publishAndUpdate(client_id, token, process);
+    }, sendResponse);
   }
 
   if (message.type === "ONLY_BULK_DELETE") {
-    console.log(`ONLY_BULK_DELETE`);
-    let { client_id, token } = message.payload;
-    onlyBulkDelete(client_id, token, sendResponse);
+    return runAbortableProcess(async (process) => {
+      console.log(`ONLY_BULK_DELETE`);
+      let { client_id, token } = message.payload;
+      return await onlyBulkDelete(client_id, token, process);
+    }, sendResponse);
   }
 
   if (message.type === "DELETE_ONE_LOG") {
-    let { post_id } = message.payload;
-    if (post_id) {
-      deleteLogByPostId(post_id, sendResponse);
+    const { post_id } = message.payload || {};
+
+    if (!post_id) {
+      sendResponse({
+        success: false,
+        message: "Post ID is required",
+      });
+
+      return true;
     }
+
+    deleteLogByPostId(post_id)
+      .then((result) => {
+        sendResponse(result);
+      })
+      .catch((error) => {
+        sendResponse({
+          success: false,
+          message: error.message || "Something went wrong",
+        });
+      });
+
+    return true;
   }
 
-  return true;
+  return false;
 });
 
 async function saveConfig({ client_id, token, country }) {
-  const formData = new FormData();
-  formData.append("token", token);
-
   await chrome.storage.local.set({ country });
 
   const response = await fetchInventories(client_id, token);
@@ -95,25 +153,18 @@ async function saveConfig({ client_id, token, country }) {
   };
 }
 
-async function deleteLogByPostId(post_id, sendResponse) {
+async function deleteLogByPostId(post_id) {
   const { client_id, token } = await chrome.storage.local.get([
     "client_id",
     "token",
   ]);
 
-  deleteOneLog(client_id, token, post_id)
-    .then((result) => {
-      sendResponse({
-        success: true,
-        message: `Post ID: ${post_id} has been deleted.`,
-      });
-    })
-    .catch((error) => {
-      sendResponse({
-        success: false,
-        message: error.message || "Something went wrong",
-      });
-    });
+  await deleteOneLog(client_id, token, post_id);
+
+  return {
+    success: true,
+    message: `Post ID: ${post_id} has been deleted.`,
+  };
 }
 
 chrome.storage.onChanged.addListener(handleBackgroundImageFetchRequest);

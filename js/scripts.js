@@ -2,6 +2,7 @@
   const setup_button = document.getElementById("saveConfigBtn");
   const reset_setup_button = document.getElementById("resetConfigBtn");
   const proceed_button = document.getElementById("proceedBtn");
+  const stop_button = document.getElementById("stopBtn");
   const client_id_input = document.getElementById("clientIdInput");
   const token_input = document.getElementById("tokenInput");
   const country_select = document.getElementById("countrySelect");
@@ -98,6 +99,14 @@
     loadConfig();
   });
 
+  stop_button.addEventListener("click", async function (event) {
+    event.preventDefault();
+
+    await chrome.runtime.sendMessage({
+      type: "STOP_PROCESS",
+    });
+  });
+
   reset_setup_button.addEventListener("click", async function (event) {
     event.preventDefault();
 
@@ -136,4 +145,22 @@
   });
 
   loadConfig();
+
+  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.type !== "PROCESS_UPDATE") {
+      return;
+    }
+    const payload = message.payload || {};
+    console.log("Process update:", payload);
+
+    let process_update_message =
+      payload?.message ||
+      (payload ? JSON.stringify(payload) : "No message provided");
+
+    if (payload?.success) {
+      showMessage(process_update_message);
+    } else {
+      showMessage(process_update_message, true);
+    }
+  });
 })();

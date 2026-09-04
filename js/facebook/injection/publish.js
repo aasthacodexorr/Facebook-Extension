@@ -6,6 +6,7 @@
     fillInput,
     elementExists,
     findDomsContainingText,
+    sleep,
   } = window.domHelpers;
 
   async function publishInventory() {
