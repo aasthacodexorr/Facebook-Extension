@@ -123,8 +123,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   return false;
 });
 
-async function saveConfig({ client_id, token, country }) {
-  await chrome.storage.local.set({ country });
+async function saveConfig({ client_id, token, country, host_permission }) {
+  await chrome.storage.local.set({
+    country,
+    host_permission: host_permission || "",
+  });
 
   const response = await fetchInventories(client_id, token);
   const data = await response.json();
@@ -145,6 +148,7 @@ async function saveConfig({ client_id, token, country }) {
     client_id,
     token,
     show_setup: false,
+    host_permission: host_permission || "",
   });
 
   return {

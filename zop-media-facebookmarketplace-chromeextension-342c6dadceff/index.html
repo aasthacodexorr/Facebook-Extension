@@ -29,6 +29,11 @@
           <span class="value" id="tokenDom"></span>
         </div>
 
+        <div class="info-row d-none" id="hostPermissionRow">
+          <span class="label">Host Permission</span>
+          <span class="value" id="hostPermissionDom"></span>
+        </div>
+
         <div class="tips">
           <div class="tip">
             <span class="tip-icon">i</span>
@@ -76,6 +81,16 @@
               <option value="CA" selected>CANADA</option>
               <option value="US">USA</option>
             </select>
+          </div>
+
+          <div class="form-group">
+            <label for="hostPermissionInput">Host Permission (Optional)</label>
+            <input
+              type="text"
+              id="hostPermissionInput"
+              name="hostPermission"
+              placeholder="e.g. https://cdn.example.com/*"
+            />
           </div>
 
           <button class="btn-primary" type="submit" id="saveConfigBtn">
