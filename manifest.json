@@ -25,6 +25,9 @@
     "https://images.autofunds.net/*",
     "http://imageonthefly.autodatadirect.com/*"
   ],
+  "optional_host_permissions": [
+    "*://*/*"
+  ],
   "side_panel": {
     "default_path": "index.html"
   },
