@@ -1,4 +1,9 @@
 import { fetchInventories, updateLog, deleteOneLog } from "../zopsoftware.js";
+import {
+  getDailyPublishingState,
+  recordPublishedVehicle,
+  formatRemainingTimeFriendly,
+} from "../automation/daily_limit.js";
 
 export const markInventoriesAsSold = async (client_id, token, process) => {
   try {
@@ -162,6 +167,27 @@ export const publishAndUpdate = async (client_id, token, process) => {
     const { inventory, enable_group_posting, fbmp_list_of_groups } =
       await response.json();
 
+    const initialState = await getDailyPublishingState();
+    if (initialState.isLimitReached) {
+      const hasNewToPublish = (inventory || []).some(
+        (v) =>
+          !v.facebook_status &&
+          !["UPDATED", "PUBLISHED", "DRAFT"].includes(v.facebook_status),
+      );
+      if (hasNewToPublish) {
+        const formatted = formatRemainingTimeFriendly(initialState.remainingMs);
+        await process.notify({
+          success: false,
+          running: false,
+          message: `Daily publishing limit of ${initialState.limit} reached. Next inventory can be published after 24 hours (${formatted}).`,
+        });
+        return {
+          success: false,
+          message: `Daily publishing limit of ${initialState.limit} reached. Next inventory can be published after 24 hours (${formatted}).`,
+        };
+      }
+    }
+
     let published_inventories = 0;
 
     for (const vehicle of inventory) {
@@ -195,7 +221,14 @@ export const publishAndUpdate = async (client_id, token, process) => {
       });
 
       if (!facebook_status) {
-        if (++published_inventories > 15) {
+        const state = await getDailyPublishingState();
+        if (state.isLimitReached) {
+          const formatted = formatRemainingTimeFriendly(state.remainingMs);
+          await process.notify({
+            success: false,
+            running: false,
+            message: `Daily publishing limit of ${state.limit} reached. Next inventory can be published after 24 hours (${formatted}).`,
+          });
           break;
         }
 
@@ -211,6 +244,20 @@ export const publishAndUpdate = async (client_id, token, process) => {
           current_modification_hash: modification_hash,
           status: result.status,
         });
+
+        if (!facebook_status) {
+          const updatedState = await recordPublishedVehicle();
+          if (updatedState.isLimitReached) {
+            const formatted = formatRemainingTimeFriendly(
+              updatedState.remainingMs,
+            );
+            await process.notify({
+              success: true,
+              running: true,
+              message: `Daily publishing limit reached (${updatedState.count}/${updatedState.limit}). Next inventory can be published after 24 hours (${formatted}).`,
+            });
+          }
+        }
 
         await process.notify({
           success: true,
