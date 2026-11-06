@@ -99,6 +99,23 @@
         </form>
       </section>
       <section class="card actions d-none" id="actionSection">
+        <div class="form-group" id="dailyLimitGroup">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+            <label for="dailyLimitSelect" style="font-size: 12px; font-weight: 700; color: #374151;">Daily Publishing Limit</label>
+            <span id="limitCountBadge" style="font-size: 11px; font-weight: 700; background: #eff6ff; color: #2563eb; padding: 2px 8px; border-radius: 9999px;">0 / 25</span>
+          </div>
+          <select name="dailyLimit" id="dailyLimitSelect">
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="15">15</option>
+            <option value="25" selected>25</option>
+          </select>
+          <div id="limitTimerContainer" class="limit-timer d-none">
+            <span id="limitTimerLabel" style="font-weight: 700;">⏱ Next publish in:</span>
+            <span id="limitTimerCountdown" style="font-weight: 800; font-family: monospace;"></span>
+          </div>
+        </div>
+
         <h2 class="section-title">Select Action</h2>
         <p class="section-subtitle">Choose one action to perform.</p>
 

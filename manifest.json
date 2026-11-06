@@ -26,6 +26,8 @@
     "http://imageonthefly.autodatadirect.com/*"
   ],
   "optional_host_permissions": [
+    "https://*/*",
+    "http://*/*",
     "*://*/*"
   ],
   "side_panel": {
@@ -35,5 +37,5 @@
     "service_worker": "background.js",
     "type": "module"
   },
-  "permissions": ["sidePanel", "storage", "scripting"]
+  "permissions": ["sidePanel", "storage", "scripting", "alarms"]
 }

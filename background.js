@@ -10,6 +10,14 @@ import {
   runAbortableProcess,
   stopProcess,
 } from "./js/automation/process_manager.js";
+import { checkAndResetDailyLimit } from "./js/automation/daily_limit.js";
+
+chrome.alarms.create("daily_publishing_reset", { periodInMinutes: 1 });
+chrome.alarms.onAlarm.addListener(async (alarm) => {
+  if (alarm.name === "daily_publishing_reset") {
+    await checkAndResetDailyLimit();
+  }
+});
 
 chrome.runtime.onInstalled.addListener(async () => {
   chrome.sidePanel

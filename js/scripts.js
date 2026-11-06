@@ -15,8 +15,101 @@
   const token_dom = document.getElementById("tokenDom");
   const host_permission_dom = document.getElementById("hostPermissionDom");
   const host_permission_row = document.getElementById("hostPermissionRow");
+  const daily_limit_select = document.getElementById("dailyLimitSelect");
+  const limit_count_badge = document.getElementById("limitCountBadge");
+  const limit_timer_container = document.getElementById("limitTimerContainer");
+  const limit_timer_label = document.getElementById("limitTimerLabel");
+  const limit_timer_countdown = document.getElementById("limitTimerCountdown");
   const action_section_dom = document.getElementById("actionSection");
   const config_section_dom = document.getElementById("configSection");
+
+  function formatRemainingTime(ms) {
+    if (ms <= 0) return "00:00:00";
+    const totalSeconds = Math.floor(ms / 1000);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    const pad = (n) => String(n).padStart(2, "0");
+    return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+  }
+
+  function formatRemainingTimeFriendly(ms) {
+    if (ms <= 0) return "0s";
+    const totalSeconds = Math.floor(ms / 1000);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    const parts = [];
+    if (hours > 0) parts.push(`${hours}h`);
+    if (minutes > 0) parts.push(`${minutes}m`);
+    parts.push(`${seconds}s`);
+    return parts.join(" ");
+  }
+
+  async function updateDailyLimitUI() {
+    const data = await chrome.storage.local.get([
+      "daily_publishing_limit",
+      "daily_published_count",
+      "daily_limit_reset_time",
+    ]);
+
+    const limit = Number(data.daily_publishing_limit) || 25;
+    let count = Number(data.daily_published_count) || 0;
+    let resetTime = Number(data.daily_limit_reset_time) || 0;
+    const now = Date.now();
+
+    if (resetTime > 0 && now >= resetTime) {
+      count = 0;
+      resetTime = 0;
+      await chrome.storage.local.set({
+        daily_published_count: 0,
+        daily_limit_reset_time: 0,
+      });
+    }
+
+    if (daily_limit_select) {
+      daily_limit_select.value = String(limit);
+    }
+
+    if (limit_count_badge) {
+      limit_count_badge.innerText = `${count} / ${limit}`;
+      if (count >= limit) {
+        limit_count_badge.style.background = "#fee2e2";
+        limit_count_badge.style.color = "#dc2626";
+      } else {
+        limit_count_badge.style.background = "#eff6ff";
+        limit_count_badge.style.color = "#2563eb";
+      }
+    }
+
+    const remainingMs = resetTime > now ? resetTime - now : 0;
+
+    if (limit_timer_container && limit_timer_countdown) {
+      if (count >= limit && remainingMs > 0) {
+        limit_timer_container.classList.remove("d-none");
+        if (limit_timer_label) {
+          limit_timer_label.innerText = "⏱ Next publish in:";
+        }
+        limit_timer_countdown.innerText = formatRemainingTime(remainingMs);
+      } else {
+        limit_timer_container.classList.add("d-none");
+      }
+    }
+  }
+
+  if (daily_limit_select) {
+    daily_limit_select.addEventListener("change", async (event) => {
+      const selectedLimit = Number(event.target.value) || 25;
+      await chrome.storage.local.set({
+        daily_publishing_limit: selectedLimit,
+      });
+      updateDailyLimitUI();
+    });
+  }
+
+  setInterval(updateDailyLimitUI, 1000);
 
   function formatHostPermission(input) {
     if (!input) return "";
@@ -129,6 +222,8 @@
       action_section_dom.classList.remove("d-none");
       config_section_dom.classList.add("d-none");
     }
+
+    await updateDailyLimitUI();
   }
 
   setup_button.addEventListener("click", async function (event) {
@@ -182,10 +277,13 @@
         }
       } catch (permissionError) {
         console.error("Failed to request host permission:", permissionError);
-        showMessage(
-          permissionError.message || "Failed to request host permission.",
-          true,
-        );
+        let errorMsg =
+          permissionError.message || "Failed to request host permission.";
+        if (errorMsg.includes("Only permissions specified in the manifest")) {
+          errorMsg =
+            "Extension updated! Please reload the extension on chrome://extensions (click the reload arrow) and try again.";
+        }
+        showMessage(errorMsg, true);
         return;
       }
     }
@@ -240,6 +338,37 @@
     const action_value =
       document.querySelector('input[name="action"]:checked')?.value || null;
 
+    if (action_value === "PUBLISH_AND_UPDATE") {
+      const limitData = await chrome.storage.local.get([
+        "daily_publishing_limit",
+        "daily_published_count",
+        "daily_limit_reset_time",
+      ]);
+      const limit = Number(limitData.daily_publishing_limit) || 25;
+      let count = Number(limitData.daily_published_count) || 0;
+      let resetTime = Number(limitData.daily_limit_reset_time) || 0;
+      const now = Date.now();
+
+      if (resetTime > 0 && now >= resetTime) {
+        count = 0;
+        resetTime = 0;
+        await chrome.storage.local.set({
+          daily_published_count: 0,
+          daily_limit_reset_time: 0,
+        });
+      }
+
+      if (count >= limit) {
+        const remainingMs = resetTime > now ? resetTime - now : 0;
+        showMessage(
+          `Daily publishing limit of ${limit} reached. Next inventory can be published after 24 hours (${formatRemainingTimeFriendly(remainingMs)}).`,
+          true,
+        );
+        updateDailyLimitUI();
+        return;
+      }
+    }
+
     const response = await chrome.runtime.sendMessage({
       type: action_value,
       payload: {
@@ -279,4 +408,22 @@
       showMessage(process_update_message, true);
     }
   });
+
+  chrome.storage.onChanged.addListener((changes, areaName) => {
+    if (areaName === "local") {
+      if (
+        changes.daily_publishing_limit ||
+        changes.daily_published_count ||
+        changes.daily_limit_reset_time
+      ) {
+        updateDailyLimitUI();
+      }
+    }
+  });
+
+  if (typeof window !== "undefined") {
+    window.formatRemainingTime = formatRemainingTime;
+    window.formatRemainingTimeFriendly = formatRemainingTimeFriendly;
+    window.updateDailyLimitUI = updateDailyLimitUI;
+  }
 })();
