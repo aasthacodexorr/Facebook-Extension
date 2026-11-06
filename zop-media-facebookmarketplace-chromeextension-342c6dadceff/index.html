@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Marketplace Assistant</title>
+
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+
+  <body>
+    <main class="popup">
+      <header class="header">
+        <div class="logo">F</div>
+        <div class="header-text">
+          <h1>Marketplace Assistant</h1>
+          <p>Marketplace automation settings</p>
+        </div>
+      </header>
+
+      <section class="card d-none" id="connectionInformation">
+        <div class="info-row">
+          <span class="label">Client</span>
+          <span class="value" id="clientDom"></span>
+        </div>
+
+        <div class="info-row">
+          <span class="label">Token</span>
+          <span class="value" id="tokenDom"></span>
+        </div>
+
+        <div class="tips">
+          <div class="tip">
+            <span class="tip-icon">i</span>
+            <span>Select Bulk Delete maximum twice in 15 days.</span>
+          </div>
+
+          <div class="tip">
+            <span class="tip-icon">i</span>
+            <span
+              >Mark Only Sold will mark inventories as SOLD when their status is
+              SOLD in your system.</span
+            >
+          </div>
+        </div>
+      </section>
+      <section class="card" id="configSection">
+        <h2 class="section-title">Configuration</h2>
+        <p class="section-subtitle">
+          Enter your Client ID and Token to continue.
+        </p>
+
+        <form class="config-form" id="configForm">
+          <div class="form-group">
+            <label for="clientId">Client ID</label>
+            <input
+              type="text"
+              id="clientIdInput"
+              name="clientId"
+              placeholder="Enter Client ID"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="token">Token</label>
+            <input
+              type="password"
+              id="tokenInput"
+              name="token"
+              placeholder="Enter Token"
+            />
+          </div>
+          <div class="form-group">
+            <label for="countrySelect">Country</label>
+            <select name="country" id="countrySelect">
+              <option value="CA" selected>CANADA</option>
+              <option value="US">USA</option>
+            </select>
+          </div>
+
+          <button class="btn-primary" type="submit" id="saveConfigBtn">
+            Setup
+          </button>
+        </form>
+      </section>
+      <section class="card actions d-none" id="actionSection">
+        <h2 class="section-title">Select Action</h2>
+        <p class="section-subtitle">Choose one action to perform.</p>
+
+        <form class="actions" id="actionForm">
+          <label class="action-option">
+            <input
+              type="radio"
+              name="action"
+              value="PUBLISH_AND_UPDATE"
+              checked
+            />
+            <span class="action-title">Publish and Update</span>
+          </label>
+
+          <label class="action-option">
+            <input type="radio" name="action" value="ONLY_BULK_DELETE" />
+            <span class="action-title">Only Bulk Delete</span>
+          </label>
+
+          <!--<label class="action-option">
+            <input type="radio" name="action" value="renew" />
+            <span class="action-title">Only Renew</span>
+          </label> -->
+
+          <label class="action-option">
+            <input type="radio" name="action" value="MARK_ONLY_SOLD" />
+            <span class="action-title">Mark Only Sold</span>
+          </label>
+        </form>
+
+        <div class="button-row">
+          <button class="btn-secondary" type="button" id="resetConfigBtn">
+            Back to Setup
+          </button>
+          <button class="btn-primary" type="button" id="proceedBtn">
+            Proceed
+          </button>
+          <button
+            style="
+              color: #fff;
+              background-color: #dc3545;
+              border-color: #dc3545;
+            "
+            class="btn-danger"
+            type="button"
+            id="stopBtn"
+          >
+            Stop
+          </button>
+        </div>
+      </section>
+      <div class="config-status" id="configStatus"></div>
+
+      <div class="footer">ZOP FBMP Web Extension</div>
+    </main>
+    <script src="js/scripts.js"></script>
+  </body>
+</html>

@@ -1,0 +1,36 @@
+{
+  "manifest_version": 3,
+  "name": "Marketplace Assistant",
+  "author": "DCZ3R0",
+  "version": "2.0.0",
+  "description": "This plugin is designed to help you post your inventories on FB Marketplace with minimal efforts. Powered by ZOP.",
+  "icons": {
+    "32": "images/chrome_icon_tight_32.png",
+    "48": "images/chrome_icon_tight_48.png",
+    "128": "images/chrome_icon_tight_128.png"
+  },
+  "host_permissions": [
+    "https://www.facebook.com/*",
+    "https://*.facebook.com/*",
+    "https://*.zopsoftware.com/*",
+    "https://*.zopsoftwareus.com/*",
+    "https://zopsoftware-asset.b-cdn.net/*",
+    "https://1s-photomanager-prd.autotradercdn.ca/*",
+    "https://boostcarimages.blob.core.windows.net/*",
+    "https://aws.goxeedealer.com/*",
+    "https://cdn05.carsforsale.com/*",
+    "https://imagesdl.dealercenter.net/*",
+    "http://imagescdn.dealercarsearch.com/*",
+    "https://imagescf.dealercenter.net/*",
+    "https://images.autofunds.net/*",
+    "http://imageonthefly.autodatadirect.com/*"
+  ],
+  "side_panel": {
+    "default_path": "index.html"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "permissions": ["sidePanel", "storage", "scripting"]
+}
