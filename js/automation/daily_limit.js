@@ -1,5 +1,5 @@
 export const DAILY_LIMIT_DEFAULT = 25;
-export const DAILY_LIMIT_OPTIONS = [5, 10, 15, 25];
+export const DAILY_LIMIT_OPTIONS = [2, 5, 10, 15, 25];
 export const RESET_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 export function formatRemainingTime(ms) {

@@ -20,6 +20,7 @@
   const limit_timer_container = document.getElementById("limitTimerContainer");
   const limit_timer_label = document.getElementById("limitTimerLabel");
   const limit_timer_countdown = document.getElementById("limitTimerCountdown");
+  const limit_locked_note = document.getElementById("limitLockedNote");
   const action_section_dom = document.getElementById("actionSection");
   const config_section_dom = document.getElementById("configSection");
 
@@ -70,7 +71,20 @@
     }
 
     if (daily_limit_select) {
+      const isLocked = count > 0;
       daily_limit_select.value = String(limit);
+      daily_limit_select.disabled = isLocked;
+      daily_limit_select.title = isLocked
+        ? "Daily limit cannot be changed while a publishing cycle is active."
+        : "Select daily publishing limit";
+
+      if (limit_locked_note) {
+        if (isLocked && count < limit) {
+          limit_locked_note.classList.remove("d-none");
+        } else {
+          limit_locked_note.classList.add("d-none");
+        }
+      }
     }
 
     if (limit_count_badge) {
@@ -101,6 +115,23 @@
 
   if (daily_limit_select) {
     daily_limit_select.addEventListener("change", async (event) => {
+      const data = await chrome.storage.local.get([
+        "daily_published_count",
+        "daily_limit_reset_time",
+      ]);
+      let currentCount = Number(data.daily_published_count) || 0;
+      let resetTime = Number(data.daily_limit_reset_time) || 0;
+      const now = Date.now();
+
+      if (resetTime > 0 && now >= resetTime) {
+        currentCount = 0;
+      }
+
+      if (currentCount > 0) {
+        updateDailyLimitUI();
+        return;
+      }
+
       const selectedLimit = Number(event.target.value) || 25;
       await chrome.storage.local.set({
         daily_publishing_limit: selectedLimit,
