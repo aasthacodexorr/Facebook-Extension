@@ -2,6 +2,9 @@ const { sleep } = window.domHelpers;
 
 class ImageUpload {
   findFacebookFileInput() {
+    const imageInput = document.querySelector('input[type="file"][accept*="image"]');
+    if (imageInput) return imageInput;
+
     const dialogInput = document
       .querySelector('[role="dialog"] form')
       ?.querySelector('input[type="file"]');

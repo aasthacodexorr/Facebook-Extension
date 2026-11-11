@@ -245,7 +245,7 @@ export const publishAndUpdate = async (client_id, token, process) => {
           status: result.status,
         });
 
-        if (!facebook_status) {
+        if (!facebook_status && result.status === "PUBLISHED") {
           const updatedState = await recordPublishedVehicle();
           if (updatedState.isLimitReached) {
             const formatted = formatRemainingTimeFriendly(
@@ -421,14 +421,11 @@ async function updateInventory(vehicle, post_id, process) {
       ],
     });
 
-    if (result?.result) {
-      result.result.post_id = post_id;
-    }
+    const updateResult = result?.result || { status: "NOT UPDATED" };
+    updateResult.post_id = post_id;
 
     await process.closeTab(tab.id);
-
-    return result?.result || "";
-    return result.result;
+    return updateResult;
   } catch (error) {
     if (tab?.id) {
       await process.closeTab(tab.id);
@@ -439,8 +436,7 @@ async function updateInventory(vehicle, post_id, process) {
     }
 
     console.error("updateInventory failed:", error);
-
-    return "";
+    return { status: "FAILED", post_id, error: error.message };
   }
 }
 
@@ -461,7 +457,7 @@ async function publishInventory(vehicle, process) {
 
     await setVehicleDataForTab(tab.id, vehicle, process);
 
-    const postIdPromise = waitForMarketplacePostId(tab.id, 420000, process);
+    const postIdPromise = waitForMarketplacePostId(tab.id, 45000, process);
 
     const [result] = await process.executeScript(tab.id, {
       files: [
@@ -471,15 +467,20 @@ async function publishInventory(vehicle, process) {
       ],
     });
 
-    const post_id = await postIdPromise;
+    const publishResult = result?.result || { status: "FAILED" };
 
-    console.log("Marketplace post ID:", post_id);
-    console.log(result);
+    let post_id = "";
+    if (publishResult.status === "PUBLISHED") {
+      post_id = await postIdPromise;
+    }
 
-    result.result.post_id = post_id;
+    publishResult.post_id = post_id || "";
+
+    console.log("Marketplace post ID:", publishResult.post_id);
+    console.log("Publish result:", publishResult);
 
     await process.closeTab(tab.id);
-    return result.result;
+    return publishResult;
   } catch (error) {
     if (tab?.id) {
       await process.closeTab(tab.id);
@@ -490,7 +491,7 @@ async function publishInventory(vehicle, process) {
     }
 
     console.error("publishInventory failed:", error);
-    return "";
+    return { status: "FAILED", error: error.message };
   }
 }
 
@@ -666,17 +667,25 @@ async function injectGraphqlInterceptor(tabId, process) {
       function extractMarketplacePostIdFromText(text) {
         try {
           if (!text) return "";
+          const cleanText = text.replace(/^for\s*\(\s*;\s*;\s*\);/, "").trim();
+          try {
+            const json = JSON.parse(cleanText);
+            const id =
+              json?.data?.marketplace_listing_create?.listing?.id ||
+              json?.data?.marketplace_listing_update?.listing?.id;
+            if (id) return String(id);
+          } catch {}
 
-          const json = JSON.parse(text);
-
-          return (
-            json?.data?.marketplace_listing_create?.listing?.id ||
-            json?.data?.marketplace_listing_update?.listing?.id ||
-            ""
-          );
+          const match =
+            text.match(/"marketplace_listing_(?:create|update)"\s*:\s*\{[^}]*?"id"\s*:\s*"(\d+)"/) ||
+            text.match(/"listing"\s*:\s*\{[^}]*?"id"\s*:\s*"(\d+)"/);
+          if (match && match[1]) {
+            return match[1];
+          }
         } catch {
           return "";
         }
+        return "";
       }
     },
   });
